@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: aggregator
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: aggregator-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: ru.yandex.practicum.kafka.deserializer.SensorEventDeserializer
+      auto-offset-reset: earliest
+
+    producer:
+      client-id: aggregator-producer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer
+      acks: 1
+
+app:
+  kafka:
+    topics:
+      sensor-events: telemetry.sensors.v1
+      snapshots: telemetry.snapshots.v1
+
+logging:
+  level:
+    ru.yandex.practicum.telemetry: TRACE
+    org:
+      springframework: ERROR
+      apache.kafka: WARN

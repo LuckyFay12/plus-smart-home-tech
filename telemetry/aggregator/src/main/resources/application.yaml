@@ -3,12 +3,16 @@ spring:
     name: aggregator
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: localhost:9092
+
     consumer:
-      group-id: aggregator-group
+      group-id: aggregator-snapshot-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: ru.yandex.practicum.kafka.deserializer.SensorEventDeserializer
       auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        specific.avro.reader: true
 
     producer:
       client-id: aggregator-producer
@@ -19,12 +23,11 @@ spring:
 app:
   kafka:
     topics:
-      sensor-events: telemetry.sensors.v1
-      snapshots: telemetry.snapshots.v1
+      sensor-events: "telemetry.sensors.v1"
+      snapshots: "telemetry.snapshots.v1"
 
 logging:
   level:
-    ru.yandex.practicum.telemetry: TRACE
-    org:
-      springframework: ERROR
-      apache.kafka: WARN
+    yandex.practicum.telemetry: DEBUG
+    org.apache.kafka: WARN
+    org.springframework.kafka: DEBUG

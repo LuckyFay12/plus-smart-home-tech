@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: aggregator
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+      group-id: aggregator-snapshot-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: ru.yandex.practicum.kafka.deserializer.SensorEventDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        specific.avro.reader: true
+
+    producer:
+      client-id: aggregator-producer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer
+      acks: 1
+
+app:
+  kafka:
+    topics:
+      sensor-events: "telemetry.sensors.v1"
+      snapshots: "telemetry.snapshots.v1"
+
+logging:
+  level:
+    yandex.practicum.telemetry: DEBUG
+    org.apache.kafka: WARN
+    org.springframework.kafka: DEBUG

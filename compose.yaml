@@ -33,3 +33,19 @@ services:
                              --partitions 1 --replication-factor 1 --if-not-exists \
                              --bootstrap-server kafka:29092'"
     init: true
+
+  postgres:
+    image: postgres:16.1
+    container_name: postgres
+    hostname: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: telemetry_analyzer
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+    ports:
+      - "5432:5432"

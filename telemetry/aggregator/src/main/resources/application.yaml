@@ -13,7 +13,6 @@ spring:
       enable-auto-commit: false
       properties:
         specific.avro.reader: true
-      poll-timeout: 100ms
 
     producer:
       client-id: aggregator-producer

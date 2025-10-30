@@ -17,18 +17,19 @@ public class KafkaConfig {
     private final Map<String, ConsumerConfig> consumers;
 
     public KafkaConfig(Map<String, String> commonProperties, List<ConsumerConfig> consumers) {
-        this.consumers = consumers
-                .stream()
+        this.consumers = consumers.stream()
                 .peek(config -> {
-                    Properties mergedProps = new Properties();
-                    mergedProps.putAll(commonProperties);
-                    mergedProps.putAll(config.getProperties());
-                    config.setProperties(mergedProps);
-                })
+                            Properties mergedProps = new Properties();
+                            mergedProps.putAll(commonProperties);
+                            mergedProps.putAll(config.getProperties());
+                            config.setProperties(mergedProps);
+                        }
+                )
                 .collect(Collectors.toMap(ConsumerConfig::getType, Function.identity()));
     }
 
-    @Setter @Getter
+    @Setter
+    @Getter
     public static class ConsumerConfig {
         private String type;
         private List<String> topics;
@@ -45,3 +46,4 @@ public class KafkaConfig {
         }
     }
 }
+

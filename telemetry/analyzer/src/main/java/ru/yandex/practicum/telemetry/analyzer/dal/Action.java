@@ -1,8 +1,7 @@
 package ru.yandex.practicum.telemetry.analyzer.dal;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro;
 
 @Entity
@@ -19,3 +18,4 @@ public class Action {
 
     private Integer value;
 }
+

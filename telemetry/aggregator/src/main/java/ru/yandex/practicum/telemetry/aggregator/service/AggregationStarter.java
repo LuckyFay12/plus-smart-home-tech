@@ -32,11 +32,6 @@ public class AggregationStarter {
 
     private final KafkaProducer<String, Object> producer;
 
-    /**
-     * Метод для начала процесса агрегации данных.
-     * Подписывается на топики для получения событий от датчиков,
-     * формирует снимок их состояния и записывает в кафку.
-     */
     public void start() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Получен сигнал завершения. Останавливаем агрегатор.");

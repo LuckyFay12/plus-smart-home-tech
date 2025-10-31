@@ -65,4 +65,3 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
         };
     }
 }
-

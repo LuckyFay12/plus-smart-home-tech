@@ -12,7 +12,6 @@ import ru.yandex.practicum.telemetry.analyzer.dal.Sensor;
 import ru.yandex.practicum.telemetry.analyzer.repository.ActionRepository;
 import ru.yandex.practicum.telemetry.analyzer.repository.ConditionRepository;
 import ru.yandex.practicum.telemetry.analyzer.repository.ScenarioRepository;
-import ru.yandex.practicum.telemetry.analyzer.repository.SensorRepository;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,10 +21,10 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ScenarioHandler {
+public class ScenarioService {
 
     private final ScenarioRepository scenarioRepository;
-    private final SensorRepository sensorRepository;
+    private final SensorService sensorService;
     private final ConditionRepository conditionRepository;
     private final ActionRepository actionRepository;
 
@@ -69,42 +68,20 @@ public class ScenarioHandler {
         log.info("Добавление устройства {} типа {} для хаба {}.",
                 deviceAddedEvent.getId(), deviceAddedEvent.getType(), hubId);
 
-        Optional<Sensor> existingSensor = sensorRepository.findById(deviceAddedEvent.getId());
-        if (existingSensor.isPresent()) {
-            log.warn("Датчик {} уже существует.", deviceAddedEvent.getId());
-            return;
-        }
-
-        Sensor sensor = new Sensor();
-        sensor.setId(deviceAddedEvent.getId());
-        sensor.setHubId(hubId);
-        sensorRepository.save(sensor);
-
-        log.info("Датчик {} для хаба {} сохранен.", deviceAddedEvent.getId(), hubId);
+        sensorService.createSensor(hubId, deviceAddedEvent.getId());
     }
 
     @Transactional
     public void handleDeviceRemoved(String hubId, DeviceRemovedEventAvro deviceRemovedEvent) {
         log.info("Удаление устройства {} для хаба {}.", deviceRemovedEvent.getId(), hubId);
-
-        Optional<Sensor> sensor = sensorRepository.findById(deviceRemovedEvent.getId());
-        if (sensor.isPresent()) {
-            if (!sensor.get().getHubId().equals(hubId)) {
-                log.warn("Датчик {} не принадлежит хабу {}.", deviceRemovedEvent.getId(), hubId);
-                return;
-            }
-            sensorRepository.delete(sensor.get());
-            log.info("Датчик {} для хаба {} удален.", deviceRemovedEvent.getId(), hubId);
-        } else {
-            log.warn("Датчик {} не найден.", deviceRemovedEvent.getId());
-        }
+        sensorService.removeSensor(hubId, deviceRemovedEvent.getId());
     }
 
     private Map<String, Action> convertToActions(String hubId, List<DeviceActionAvro> actionsAvro) {
         Map<String, Action> actions = new HashMap<>();
 
         for (DeviceActionAvro actionAvro : actionsAvro) {
-            Optional<Sensor> sensor = sensorRepository.findByIdAndHubId(actionAvro.getSensorId(), hubId);
+            Optional<Sensor> sensor = sensorService.findByIdAndHubId(actionAvro.getSensorId(), hubId);
             if (sensor.isEmpty()) {
                 log.warn("Датчик {} не найден для хаба {}. Пропуск действия.", actionAvro.getSensorId(), hubId);
                 continue;
@@ -126,7 +103,7 @@ public class ScenarioHandler {
         Map<String, Condition> conditions = new HashMap<>();
 
         for (ScenarioConditionAvro conditionAvro : conditionsAvro) {
-            Optional<Sensor> sensor = sensorRepository.findByIdAndHubId(conditionAvro.getSensorId(), hubId);
+            Optional<Sensor> sensor = sensorService.findByIdAndHubId(conditionAvro.getSensorId(), hubId);
             if (sensor.isEmpty()) {
                 log.warn("Датчик {} не найден для хаба {}. Пропуск условия.", conditionAvro.getSensorId(), hubId);
                 continue;
@@ -148,7 +125,10 @@ public class ScenarioHandler {
         return switch (value) {
             case Integer i -> i;
             case Boolean b -> b ? 1 : 0;
-            case null, default -> null;
+            case null, default -> {
+                log.warn("Неподдерживаемый тип значения: {}", value.getClass().getSimpleName());
+                yield null;
+            }
         };
     }
 }

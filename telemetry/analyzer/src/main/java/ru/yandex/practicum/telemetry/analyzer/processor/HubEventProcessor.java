@@ -10,7 +10,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.telemetry.analyzer.config.KafkaConfig;
-import ru.yandex.practicum.telemetry.analyzer.service.ScenarioHandler;
+import ru.yandex.practicum.telemetry.analyzer.service.ScenarioService;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -25,14 +25,14 @@ public class HubEventProcessor implements Runnable {
     private final KafkaConsumer<String, HubEventAvro> consumer;
     private final List<String> topics;
     private final Duration pollTimeout;
-    private final ScenarioHandler scenarioHandler;
+    private final ScenarioService scenarioService;
 
-    public HubEventProcessor(KafkaConfig config, ScenarioHandler scenarioHandler) {
+    public HubEventProcessor(KafkaConfig config, ScenarioService scenarioService) {
         final KafkaConfig.ConsumerConfig consumerConfig = config.getConsumers().get(this.getClass().getSimpleName());
         this.consumer = new KafkaConsumer<>(consumerConfig.getProperties());
         this.topics = consumerConfig.getTopics();
         this.pollTimeout = consumerConfig.getPollTimeout();
-        this.scenarioHandler = scenarioHandler;
+        this.scenarioService = scenarioService;
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("ShutdownHook: Получен сигнал завершения работы консьюмера.");
@@ -91,13 +91,13 @@ public class HubEventProcessor implements Runnable {
             String hubId = hubEventAvro.getHubId();
             switch (hubEventAvro.getPayload()) {
                 case DeviceAddedEventAvro deviceAddedEventAvro ->
-                        scenarioHandler.handleDeviceAdded(hubId, deviceAddedEventAvro);
+                        scenarioService.handleDeviceAdded(hubId, deviceAddedEventAvro);
                 case DeviceRemovedEventAvro deviceRemovedEventAvro ->
-                        scenarioHandler.handleDeviceRemoved(hubId, deviceRemovedEventAvro);
+                        scenarioService.handleDeviceRemoved(hubId, deviceRemovedEventAvro);
                 case ScenarioAddedEventAvro scenarioAddedEventAvro ->
-                        scenarioHandler.handleScenarioAdded(hubId, scenarioAddedEventAvro);
+                        scenarioService.handleScenarioAdded(hubId, scenarioAddedEventAvro);
                 case ScenarioRemovedEventAvro scenarioRemovedEventAvro ->
-                        scenarioHandler.handleScenarioRemoved(hubId, scenarioRemovedEventAvro);
+                        scenarioService.handleScenarioRemoved(hubId, scenarioRemovedEventAvro);
                 default -> log.warn("Неизвестный тип события: {}.", hubEventAvro);
             }
         } catch (Exception e) {

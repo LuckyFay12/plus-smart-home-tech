@@ -26,6 +26,9 @@ public class AggregationStarter {
     @Value("${app.kafka.topics.snapshots}")
     private String snapshotsTopic;
 
+    @Value("${spring.kafka.consumer.poll-timeout}")
+    private Duration pollTimeout;
+
     private final SnapshotService snapshotService;
 
     private final KafkaConsumer<String, SensorEventAvro> consumer;
@@ -45,7 +48,7 @@ public class AggregationStarter {
 
             while (true) {
 
-                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(Duration.ofMillis(1000));
+                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(pollTimeout);
 
                 for (ConsumerRecord<String, SensorEventAvro> record : records) {
                     log.debug("Обрабатываем событие: {}", record.value());

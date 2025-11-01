@@ -47,4 +47,3 @@ public class KafkaEventProducer implements AutoCloseable {
         producer.close(Duration.ofSeconds(10));
     }
 }
-

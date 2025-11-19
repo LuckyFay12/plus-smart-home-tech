@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: shopping-store
+  sql:
+    init:
+      mode: always
+  aop:
+    auto: true
+  data:
+    web:
+      pageable:
+        page-parameter: page
+        size-parameter: size
+        sort-parameter: sort
+        default-page-size: 20
+
+  main:
+    log-startup-info: false
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/commerce_shopping_store
+    username: postgres
+    password: postgres
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: true
+        temp.use_jdbc_metadata_defaults: false
+    hibernate:
+      ddl-auto: update
+
+logging:
+  level:
+    ru.yandex.practicum.aspect: INFO    #аспекты
+    ru.yandex.practicum.service: DEBUG  #сервис
+    org.springframework: WARN
+    org.hibernate: WARN
+
+server:
+  port: 0

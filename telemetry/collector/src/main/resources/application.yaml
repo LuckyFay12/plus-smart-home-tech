@@ -1,26 +1,19 @@
 spring:
   application:
     name: collector
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
+      discovery:
+        enabled: true
+        serviceId: config-server
 
-grpc:
-  server:
-    port: 59091
-
-logging:
-  level:
-    ru.yandex.practicum.telemetry: TRACE
-    org:
-      springframework: ERROR
-      apache.kafka: WARN
-
-collector:
-  kafka:
-    producer:
-      properties:
-        "bootstrap.servers": localhost:9092
-        "client.id": "telemetry.collector"
-        "key.serializer": org.apache.kafka.common.serialization.StringSerializer
-        "value.serializer": ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer
-      topics:
-        sensors-events: telemetry.sensors.v1
-        hubs-events: telemetry.hubs.v1
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname:localhost}:${eureka.instance.port:8761}/eureka/

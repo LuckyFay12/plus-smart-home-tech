@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: shopping-cart
+  sql:
+    init:
+      mode: always
+  aop:
+    auto: true
+  main:
+    log-startup-info: false
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/commerce_shopping_cart
+    username: postgres
+    password: postgres
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: true
+        temp.use_jdbc_metadata_defaults: false
+    hibernate:
+      ddl-auto: update
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      warehouse:           # для Feign client в shopping-cart
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 6
+        minimum-number-of-calls: 3
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+
+logging:
+  level:
+    ru.yandex.practicum.aspect: DEBUG  # для отладки аспектов
+    ru.yandex.practicum.commerce: INFO # бизнес-логика
+
+server:
+  port: 0

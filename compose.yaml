@@ -49,3 +49,23 @@ services:
       retries: 10
     ports:
       - "5432:5432"
+
+  db-init:
+    image: postgres:16.1
+    container_name: db-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: postgres
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -e
+        psql postgresql://postgres:postgres@postgres:5432/postgres -v ON_ERROR_STOP=1 <<-EOSQL
+        create database commerce_shopping_cart;
+        create database commerce_shopping_store;
+        create database commerce_warehouse;
+        EOSQL
+

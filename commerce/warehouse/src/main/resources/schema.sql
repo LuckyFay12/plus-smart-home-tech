@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS products CASCADE;
-
 CREATE TABLE IF NOT EXISTS products (
     product_id UUID PRIMARY KEY NOT NULL,
     fragile BOOLEAN NOT NULL,
